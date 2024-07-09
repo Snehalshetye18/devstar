@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import Node from '../components/Node.svelte'; // Assuming Node.svelte is in components folder
+    import Node from '../components/Node.svelte';
   
     let nodes = [];
   
@@ -11,11 +11,23 @@
     function updateNodePosition(id, top, left) {
       nodes = nodes.map(node => node.id === id ? { ...node, top, left } : node);
     }
+  
+    function allowDrop(event) {
+      event.preventDefault();
+    }
+  
+    function handleDrop(event) {
+      const data = JSON.parse(event.dataTransfer.getData('application/json'));
+      const { id, offsetX, offsetY } = data;
+      const top = event.clientY - offsetY;
+      const left = event.clientX - offsetX;
+      updateNodePosition(id, top, left);
+    }
   </script>
   
-  <div class="mindmap">
+  <div class="mindmap" on:dragover={allowDrop} on:drop={handleDrop}>
     {#each nodes as node (node.id)}
-      <Node {node} on:dragMove={e => updateNodePosition(node.id, e.detail.top, e.detail.left)} />
+      <Node {node} />
     {/each}
   </div>
   <button on:click={addNode}>Add Node</button>
